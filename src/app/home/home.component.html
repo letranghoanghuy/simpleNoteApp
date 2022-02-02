@@ -1,0 +1,142 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">My Note</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+        aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav">
+            <li class="nav-item dropdown active">
+                <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                    <img class="img-thumbnail" src="{{user.image}}" width="35px"/>
+                    {{ user?.name }}
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" data-toggle="modal" data-target="#exampleModal">
+                        <mat-icon>info</mat-icon>Đổi ảnh đại diện
+                    </a>
+                    <a class="dropdown-item" (click)="logout()">
+                        <mat-icon>logout</mat-icon>
+                        <span>Đăng xuất</span>
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav> <br>
+
+<div class=" container">
+    <button mat-raised-button color="primary" data-toggle="modal" data-target="#exampleModal1"
+    (click)="newNote()">
+        <mat-icon>add</mat-icon>Thêm ghi chú mới
+    </button> <br> <br> 
+    <div class="card table-wrapper-scroll-y my-custom-scrollbar">
+        <p-splitter [style]="{'height': '500px'}" styleClass="p-mb-5">
+            <ng-template pTemplate>
+                <div class="p-col p-d-flex p-ai-center p-jc-center" style="width:100%;">
+                    <div *ngFor="let note of newArr" style="cursor: pointer;margin-top: 10px;"
+                        (click)="viewNote(note)" [ngClass]="getSelectedClass(note)">
+                        <div style="width:80%;float: left; margin-left: 10px;">
+                            <b>{{note?.title}}</b> <br>
+                            <span><i>{{note?.date}}</i></span> <br>
+                            <span style="font-style: italic;">
+                                {{note.content.toString().substring(0,50)}} ...
+                              </span>
+                        </div>
+                        <div style="width:10%;float: right;">
+                            <mat-icon color="primary" style="font-size:25px;cursor: pointer;" data-toggle="modal"
+                                data-target="#exampleModal1" (click)="setActiveNote(note)">create</mat-icon>
+                            <mat-icon color="warn" style="font-size:25px;cursor: pointer;margin-left: 5px;"
+                                mwlConfirmationPopover [popoverTitle]="popoverTitle" [popoverMessage]="popoverMessage"
+                                placement="left" (confirm)="deleteNote(user?.key,note.key)"
+                                (cancel)="cancelClicked = true">delete
+                            </mat-icon>
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+            <ng-template pTemplate>
+                <div class="p-col p-d-flex p-ai-center p-jc-center">
+                    <div style="width:100%;margin-left: 10px;" *ngIf="selectedNote"
+                        class="p-col p-d-flex p-ai-center p-jc-center">
+                        <b>{{selectedNote?.title}}</b> <br>
+                        <label for=""><i>{{selectedNote?.date}}</i></label> <br> 
+                        <span class="p-float-label">
+                            {{selectedNote?.content}}
+                        </span> 
+                    </div>
+                </div>
+            </ng-template>
+        </p-splitter>
+    </div>
+</div>
+
+<div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thêm ghi chú mới</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="submit-form">
+                    <div *ngIf="!submitted">
+                        <div class="form-group">
+                            <label for="name">Tiêu đề</label>
+                            <textarea class="form-control" rows="2" required [(ngModel)]="note.title"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Ngày</label>
+                            <input class="form-control" type="date" required [(ngModel)]="note.date" />
+                        </div>
+                        <div class="form-group">
+                            <label for="code">Nội dung</label>
+                            <textarea class="form-control" rows="6" required [(ngModel)]="note.content"></textarea>
+                        </div>
+                    </div>
+
+                    <div *ngIf="submitted">
+                        <h4>Thành công!</h4>
+                        <button class="btn btn-success" (click)="newNote()">Thêm ghi chú mới</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button (click)="saveNote(user?.key,selectedNote?.key)" *ngIf="submitted == false"
+                    class="btn btn-success">Xác nhận</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Đổi ảnh đại diện</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" >
+                    <label for="date">Link ảnh</label>
+                    <input class="form-control" type="text" required [(ngModel)]="user.image" />
+                </div>
+                <img class="img-thumbnail" src="{{user.image}}" width="75px"/>
+            </div>
+            <div class="modal-footer">
+                <button (click)="updateImg(user?.key)" *ngIf="submitted == false"
+                    class="btn btn-success">Xác nhận</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+<p-toast></p-toast>
